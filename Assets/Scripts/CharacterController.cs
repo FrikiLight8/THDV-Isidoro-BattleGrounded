@@ -1,6 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using System.Collections;
 
 public class ThirdPersonController : MonoBehaviour
 {
@@ -22,10 +21,42 @@ public class ThirdPersonController : MonoBehaviour
     public float rollDuration = 0.6f;
     private float rollCooldown = 1f;
     private float lastRollTime = -1f;
+    public float rollHeight = 0.5f; // Altura reducida durante el roll
+    private float originalHeight; // Altura original del Character Controller
+
+    // Variables para Wall Run
+    public float wallRunSpeed = 8f;
+    public float wallRunDuration = 2f; // Duración máxima del wall run
+    public float wallRunGravity = -2f;
+    public float wallDetectionDistance = 1.5f;
+    public LayerMask wallLayer; // Qué capas se consideran paredes
+    private bool isWallRunning = false;
+    private Vector3 wallNormal;
+    private float wallRunTimer = 0f;
+    private bool canWallRun = true; // Controla si puede volver a pegarse a una pared
+
+    // Variables para Wall Jump
+    public float wallJumpForce = 8f;
+    private bool isNearWall = false; // Verifica si estamos cerca de una pared
+    private bool canWallJump = false;
+
+    // Cambiar color del personaje
+    private Renderer playerRenderer;
+    private Color originalColor;
+
+    void Start()
+    {
+        originalHeight = controller.height; // Guardamos la altura original del Character Controller
+        playerRenderer = GetComponent<Renderer>(); // Obtenemos el renderer del personaje
+        if (playerRenderer != null)
+        {
+            originalColor = playerRenderer.material.color; // Guardamos el color original del personaje
+        }
+    }
 
     void Update()
     {
-        // Chequear si está en el suelo
+        // Verificamos si el personaje está en el suelo
         isGrounded = controller.isGrounded;
         if (isGrounded && velocity.y < 0)
         {
@@ -37,7 +68,7 @@ public class ThirdPersonController : MonoBehaviour
         float vertical = Input.GetAxisRaw("Vertical");
         Vector3 direction = new Vector3(horizontal, 0f, vertical).normalized;
 
-        if (direction.magnitude >= 0.1f && !isRolling)
+        if (direction.magnitude >= 0.1f && !isRolling && !isWallRunning)
         {
             float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + cameraTransform.eulerAngles.y;
             float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref turnSmoothVelocity, turnSmoothTime);
@@ -47,20 +78,56 @@ public class ThirdPersonController : MonoBehaviour
             controller.Move(moveDir.normalized * speed * Time.deltaTime);
         }
 
-        // Salto
-        if (Input.GetButtonDown("Jump") && isGrounded)
+        // Salto y Wall Jump
+        if (Input.GetKey(KeyCode.Space))
         {
-            velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
-        }
+            if (isGrounded)
+            {
+                // Salto normal
+                velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+            }
 
-        // Rueda (Roll)
+        }
+        if (Input.GetKey(KeyCode.Space) && !isGrounded)
+        {
+            if (canWallJump)
+            {
+                // Wall Jump
+                WallJump();
+            }
+        }
+        // Rodar (Roll)
         if (Input.GetButtonDown("Roll") && Time.time - lastRollTime > rollCooldown && !isRolling)
         {
             StartCoroutine(Roll(direction));
         }
 
         // Aplicar gravedad
-        velocity.y += gravity * Time.deltaTime;
+        if (!isWallRunning)
+        {
+            velocity.y += gravity * Time.deltaTime;
+        }
+        else
+        {
+            // Gravedad reducida durante el Wall Run
+            velocity.y += wallRunGravity * Time.deltaTime;
+            controller.Move(velocity * Time.deltaTime);
+        }
+
+        // Limitar la duración del Wall Run
+        if (isWallRunning)
+        {
+            wallRunTimer += Time.deltaTime;
+            if (wallRunTimer >= wallRunDuration || isGrounded)
+            {
+                StopWallRun(); // Detener el Wall Run si dura demasiado o toca el suelo
+            }
+        }
+
+        // Detectar paredes para Wall Run y Wall Jump
+        CheckWallRunOrJump();
+
+        // Mover al personaje
         controller.Move(velocity * Time.deltaTime);
     }
 
@@ -68,6 +135,9 @@ public class ThirdPersonController : MonoBehaviour
     {
         isRolling = true;
         lastRollTime = Time.time;
+
+        // Reducir altura del Character Controller
+        controller.height = rollHeight;
 
         Vector3 rollDirection = direction.magnitude >= 0.1f ? direction : transform.forward;
         float startTime = Time.time;
@@ -78,6 +148,113 @@ public class ThirdPersonController : MonoBehaviour
             yield return null;
         }
 
+        // Volver a la altura original
+        controller.height = originalHeight;
+
         isRolling = false;
+    }
+
+    void CheckWallRunOrJump()
+    {
+        RaycastHit hit;
+
+        // Detectar pared a la derecha
+        if (Physics.Raycast(transform.position, transform.right, out hit, wallDetectionDistance, wallLayer))
+        {
+            wallNormal = hit.normal;
+            isNearWall = true;
+            canWallJump = true;
+            if (!isGrounded && Input.GetAxisRaw("Vertical") > 0 && Input.GetKey(KeyCode.LeftShift))
+            {
+                StartWallRun(hit.normal);
+            }
+        }
+        // Detectar pared a la izquierda
+        else if (Physics.Raycast(transform.position, -transform.right, out hit, wallDetectionDistance, wallLayer))
+        {
+            wallNormal = hit.normal;
+            isNearWall = true;
+            canWallJump = true;
+            if (!isGrounded && Input.GetAxisRaw("Vertical") > 0 && Input.GetKey(KeyCode.LeftShift))
+            {
+                StartWallRun(hit.normal);
+            }
+        }
+        else
+        {
+            isNearWall = false;
+            canWallJump = false;
+            if (isGrounded)
+            {
+                StopWallRun();
+            }
+        }
+    }
+
+    void StartWallRun(Vector3 normal)
+    {
+        if (!isWallRunning)
+        {
+            isWallRunning = true;
+            wallRunTimer = 0f; // Reiniciar el temporizador del Wall Run
+            wallNormal = normal; // Guardar la normal de la pared
+
+            // Cambiar el color del personaje a azul (Wall Run)
+            if (playerRenderer != null)
+            {
+                playerRenderer.material.color = Color.blue;
+            }
+        }
+
+        // Movimiento en paralelo a la pared
+        Vector3 wallRunDirection = Vector3.Cross(wallNormal, Vector3.up);
+        if (Vector3.Dot(transform.forward, wallRunDirection) < 0)
+        {
+            wallRunDirection = -wallRunDirection;
+        }
+
+        controller.Move(wallRunDirection * wallRunSpeed * Time.deltaTime);
+    }
+
+    void StopWallRun()
+    {
+        if (isWallRunning)
+        {
+            isWallRunning = false;
+            canWallRun = false; // No permitir Wall Run hasta que vuelva al aire
+
+            // Volver al color original
+            if (playerRenderer != null)
+            {
+                playerRenderer.material.color = originalColor;
+            }
+
+            // Permitir Wall Run nuevamente al estar en el aire
+            StartCoroutine(EnableWallRunAfterAirborne());
+        }
+    }
+
+    IEnumerator EnableWallRunAfterAirborne()
+    {
+        // Esperar a que el personaje esté en el aire para habilitar el Wall Run de nuevo
+        yield return new WaitUntil(() => !isGrounded);
+        canWallRun = true;
+    }
+
+    void WallJump()
+    {
+        // Saltar en la dirección opuesta a la pared
+        velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+        Vector3 jumpDirection = wallNormal + Vector3.up; // Saltar hacia atrás y arriba
+        controller.Move(jumpDirection * wallJumpForce * Time.deltaTime);
+
+        // Cambiar el color del personaje a rojo (Wall Jump)
+        if (playerRenderer != null)
+        {
+            playerRenderer.material.color = Color.red;
+        }
+
+        // Detener el Wall Run
+        StopWallRun();
     }
 }
