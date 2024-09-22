@@ -39,6 +39,8 @@ public class ThirdPersonController : MonoBehaviour
     public float wallJumpForce = 8f;
     private bool isNearWall = false; // Verifica si estamos cerca de una pared
     private bool canWallJump = false;
+    private Vector3 lastWallNormal = Vector3.zero; // Última normal de la pared tocada
+
 
     // Cambiar color del personaje
     private Renderer playerRenderer;
@@ -61,6 +63,9 @@ public class ThirdPersonController : MonoBehaviour
         if (isGrounded && velocity.y < 0)
         {
             velocity.y = -2f;  // Mantener el personaje en el suelo
+
+            // Resetear la normal de la última pared al tocar el suelo
+            lastWallNormal = Vector3.zero;
         }
 
         // Movimiento normal
@@ -180,8 +185,15 @@ public class ThirdPersonController : MonoBehaviour
         if (Physics.Raycast(transform.position, transform.right, out hit, wallDetectionDistance, wallLayer))
         {
             wallNormal = hit.normal;
+
+            // Si la pared actual es distinta de la última pared tocada, permitir Wall Jump y resetear lastWallNormal
+            if (wallNormal != lastWallNormal)
+            {
+                lastWallNormal = wallNormal;
+                canWallJump = true; // Permitir Wall Jump en esta nueva pared
+            }
+
             isNearWall = true;
-            canWallJump = true;
             if (!isGrounded && Input.GetAxisRaw("Vertical") > 0 && Input.GetKey(KeyCode.LeftShift))
             {
                 StartWallRun(hit.normal);
@@ -191,8 +203,15 @@ public class ThirdPersonController : MonoBehaviour
         else if (Physics.Raycast(transform.position, -transform.right, out hit, wallDetectionDistance, wallLayer))
         {
             wallNormal = hit.normal;
+
+            // Si la pared actual es distinta de la última pared tocada, permitir Wall Jump y resetear lastWallNormal
+            if (wallNormal != lastWallNormal)
+            {
+                lastWallNormal = wallNormal;
+                canWallJump = true; // Permitir Wall Jump en esta nueva pared
+            }
+
             isNearWall = true;
-            canWallJump = true;
             if (!isGrounded && Input.GetAxisRaw("Vertical") > 0 && Input.GetKey(KeyCode.LeftShift))
             {
                 StartWallRun(hit.normal);
@@ -202,6 +221,8 @@ public class ThirdPersonController : MonoBehaviour
         {
             isNearWall = false;
             canWallJump = false;
+
+            // Si el personaje está en el suelo, detener el Wall Run
             if (isGrounded)
             {
                 StopWallRun();
@@ -251,6 +272,7 @@ public class ThirdPersonController : MonoBehaviour
             StartCoroutine(EnableWallRunAfterAirborne());
         }
     }
+
 
     IEnumerator EnableWallRunAfterAirborne()
     {
