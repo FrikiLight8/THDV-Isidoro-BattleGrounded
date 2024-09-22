@@ -136,12 +136,28 @@ public class ThirdPersonController : MonoBehaviour
         isRolling = true;
         lastRollTime = Time.time;
 
-        // Reducir altura del Character Controller
+        // Reducir la altura del Character Controller
         controller.height = rollHeight;
 
-        Vector3 rollDirection = direction.magnitude >= 0.1f ? direction : transform.forward;
-        float startTime = Time.time;
+        Vector3 rollDirection;
 
+        // Si el jugador se está moviendo (usa WASD)
+        if (direction.magnitude >= 0.1f)
+        {
+            // Convertir la dirección de movimiento del jugador a la perspectiva de la cámara
+            float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + cameraTransform.eulerAngles.y;
+            Vector3 moveDirection = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
+
+            // El roll se hará en la dirección en la que el jugador se está moviendo según la cámara
+            rollDirection = moveDirection.normalized;
+        }
+        else
+        {
+            // Si no hay movimiento, el roll se hace hacia la dirección de la cámara
+            rollDirection = new Vector3(cameraTransform.forward.x, 0, cameraTransform.forward.z).normalized;
+        }
+
+        float startTime = Time.time;
         while (Time.time < startTime + rollDuration)
         {
             controller.Move(rollDirection * rollSpeed * Time.deltaTime);
@@ -153,6 +169,8 @@ public class ThirdPersonController : MonoBehaviour
 
         isRolling = false;
     }
+
+
 
     void CheckWallRunOrJump()
     {
