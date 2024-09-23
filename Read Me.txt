@@ -1,0 +1,12 @@
+Buenas! Gracias por descargar el prototipo de BattleGrounded!
+Primero que nada, voy a explicar el contexto del juego
+Comenzas directamente en el nivel tutorial, depende de su diseño invisible, al terminarlo, este te lleva a un nivel donde se pondran a prueba tus habilidades
+
+Aquí los controles:
+
+WASD: Movimiento del jugador
+Mouse: Movimiento de Cámara
+SPACE: Salto
+SPACE sobre una pared + dirección opuesta a la pared: Salto de pared
+CTRL: Rodar
+LSHIFT sobre una pared: Carrera de pared (Wallrun)
