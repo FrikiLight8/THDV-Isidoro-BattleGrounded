@@ -70,8 +70,8 @@ public class ThirdPersonController : MonoBehaviour
 
         // Movimiento normal
         float horizontal = Input.GetAxisRaw("Horizontal");
-        float vertical = Input.GetAxisRaw("Vertical");
-        Vector3 direction = new Vector3(horizontal, 0f, vertical).normalized;
+        float foward = Input.GetAxisRaw("Vertical");
+        Vector3 direction = new Vector3(horizontal, 0f, foward).normalized;
 
         if (direction.magnitude >= 0.1f && !isRolling && !isWallRunning)
         {
