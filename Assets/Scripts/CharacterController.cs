@@ -6,29 +6,21 @@ public class ThirdPersonController : MonoBehaviour
     public CharacterController controller;
     public Transform cameraTransform;
 
-    public float speed = 6f;
-    public float turnSmoothTime = 0.1f;
-    float turnSmoothVelocity;
+    [SerializeField]
+    private PlayerDataSO playerDataSO;
+    [SerializeField]
+    private UIManager uiManager;
 
-    public float jumpHeight = 1.5f;
-    public float gravity = -9.81f;
-    public float rollSpeed = 8f;
+    float turnSmoothVelocity;
 
     Vector3 velocity;
     bool isGrounded;
     bool isRolling = false;
-
-    public float rollDuration = 0.6f;
-    private float rollCooldown = 1f;
-    private float lastRollTime = -1f;
+    
     public float rollHeight = 0.5f; // Altura reducida durante el roll
     private float originalHeight; // Altura original del Character Controller
 
     // Variables para Wall Run
-    public float wallRunSpeed = 8f;
-    public float wallRunDuration = 2f; // Duración máxima del wall run
-    public float wallRunGravity = -2f;
-    public float wallDetectionDistance = 1.5f;
     public LayerMask wallLayer; // Qué capas se consideran paredes
     private bool isWallRunning = false;
     private Vector3 wallNormal;
@@ -36,7 +28,6 @@ public class ThirdPersonController : MonoBehaviour
     private bool canWallRun = true; // Controla si puede volver a pegarse a una pared
 
     // Variables para Wall Jump
-    public float wallJumpForce = 8f;
     private bool isNearWall = false; // Verifica si estamos cerca de una pared
     private bool canWallJump = false;
     private Vector3 lastWallNormal = Vector3.zero; // Última normal de la pared tocada
@@ -54,6 +45,7 @@ public class ThirdPersonController : MonoBehaviour
         {
             originalColor = playerRenderer.material.color; // Guardamos el color original del personaje
         }
+        Cursor.lockState = CursorLockMode.Locked;
     }
 
     void Update()
@@ -76,11 +68,11 @@ public class ThirdPersonController : MonoBehaviour
         if (direction.magnitude >= 0.1f && !isRolling && !isWallRunning)
         {
             float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + cameraTransform.eulerAngles.y;
-            float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref turnSmoothVelocity, turnSmoothTime);
+            float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref turnSmoothVelocity, playerDataSO.turnSmoothTime);
             transform.rotation = Quaternion.Euler(0f, angle, 0f);
 
             Vector3 moveDir = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
-            controller.Move(moveDir.normalized * speed * Time.deltaTime);
+            controller.Move(moveDir.normalized * playerDataSO.speed * Time.deltaTime);
         }
 
         // Salto y Wall Jump
@@ -89,7 +81,7 @@ public class ThirdPersonController : MonoBehaviour
             if (isGrounded)
             {
                 // Salto normal
-                velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+                velocity.y = Mathf.Sqrt(playerDataSO.jumpHeight * -2f * playerDataSO.gravity);
             }
 
         }
@@ -102,7 +94,7 @@ public class ThirdPersonController : MonoBehaviour
             }
         }
         // Rodar (Roll)
-        if (Input.GetButtonDown("Roll") && Time.time - lastRollTime > rollCooldown && !isRolling)
+        if (Input.GetButtonDown("Roll") && Time.time - playerDataSO.lastRollTime > playerDataSO.rollCooldown && !isRolling)
         {
             StartCoroutine(Roll(direction));
         }
@@ -110,12 +102,12 @@ public class ThirdPersonController : MonoBehaviour
         // Aplicar gravedad
         if (!isWallRunning)
         {
-            velocity.y += gravity * Time.deltaTime;
+            velocity.y += playerDataSO.gravity * Time.deltaTime;
         }
         else
         {
             // Gravedad reducida durante el Wall Run
-            velocity.y += wallRunGravity * Time.deltaTime;
+            velocity.y += playerDataSO.wallRunGravity * Time.deltaTime;
             controller.Move(velocity * Time.deltaTime);
         }
 
@@ -123,7 +115,7 @@ public class ThirdPersonController : MonoBehaviour
         if (isWallRunning)
         {
             wallRunTimer += Time.deltaTime;
-            if (wallRunTimer >= wallRunDuration || isGrounded)
+            if (wallRunTimer >= playerDataSO.wallRunDuration || isGrounded)
             {
                 StopWallRun(); // Detener el Wall Run si dura demasiado o toca el suelo
             }
@@ -134,12 +126,24 @@ public class ThirdPersonController : MonoBehaviour
 
         // Mover al personaje
         controller.Move(velocity * Time.deltaTime);
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (uiManager.isPaused)
+            {
+                uiManager.DesactivatePause();
+            }
+            else
+            {
+                uiManager.ActivatePause();
+            }
+        }
     }
 
     IEnumerator Roll(Vector3 direction)
     {
         isRolling = true;
-        lastRollTime = Time.time;
+        playerDataSO.lastRollTime = Time.time;
 
         // Reducir la altura del Character Controller
         controller.height = rollHeight;
@@ -163,9 +167,9 @@ public class ThirdPersonController : MonoBehaviour
         }
 
         float startTime = Time.time;
-        while (Time.time < startTime + rollDuration)
+        while (Time.time < startTime + playerDataSO.rollDuration)
         {
-            controller.Move(rollDirection * rollSpeed * Time.deltaTime);
+            controller.Move(rollDirection * playerDataSO.rollSpeed * Time.deltaTime);
             yield return null;
         }
 
@@ -182,7 +186,7 @@ public class ThirdPersonController : MonoBehaviour
         RaycastHit hit;
 
         // Detectar pared a la derecha
-        if (Physics.Raycast(transform.position, transform.right, out hit, wallDetectionDistance, wallLayer))
+        if (Physics.Raycast(transform.position, transform.right, out hit, playerDataSO.wallDetectionDistance, wallLayer))
         {
             wallNormal = hit.normal;
 
@@ -200,7 +204,7 @@ public class ThirdPersonController : MonoBehaviour
             }
         }
         // Detectar pared a la izquierda
-        else if (Physics.Raycast(transform.position, -transform.right, out hit, wallDetectionDistance, wallLayer))
+        else if (Physics.Raycast(transform.position, -transform.right, out hit, playerDataSO.wallDetectionDistance, wallLayer))
         {
             wallNormal = hit.normal;
 
@@ -252,7 +256,7 @@ public class ThirdPersonController : MonoBehaviour
             wallRunDirection = -wallRunDirection;
         }
 
-        controller.Move(wallRunDirection * wallRunSpeed * Time.deltaTime);
+        controller.Move(wallRunDirection * playerDataSO.wallRunSpeed * Time.deltaTime);
     }
 
     void StopWallRun()
@@ -284,9 +288,9 @@ public class ThirdPersonController : MonoBehaviour
     void WallJump()
     {
         // Saltar en la dirección opuesta a la pared
-        velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+        velocity.y = Mathf.Sqrt(playerDataSO.jumpHeight * -2f * playerDataSO.gravity);
         Vector3 jumpDirection = wallNormal + Vector3.up; // Saltar hacia atrás y arriba
-        controller.Move(jumpDirection * wallJumpForce * Time.deltaTime);
+        controller.Move(jumpDirection * playerDataSO.wallJumpForce * Time.deltaTime);
 
         // Cambiar el color del personaje a rojo (Wall Jump)
         if (playerRenderer != null)
