@@ -9,10 +9,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a8647d50bcd8569409497b2d0729b8f3, type: 3}
-  m_Name: PlayerData
+  m_Script: {fileID: 11500000, guid: 8af4b5a6f9fab034396e31981e5f0929, type: 3}
+  m_Name: CollectableData
   m_EditorClassIdentifier: 
-  sensitivity: 50
-  moveSpeed: 1000
-  walkSpeed: 15
-  runSpeed: 1000
+  increasedSpeed: 300
+  time: 3

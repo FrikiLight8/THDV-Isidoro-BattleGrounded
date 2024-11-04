@@ -47,6 +47,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   model: {fileID: 2450732175568441238}
+  collectableDataSO: {fileID: 11400000, guid: 894d5a35eae474747977efae8c404dfb, type: 2}
 --- !u!135 &3101556461896066400
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -66,7 +67,7 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 0.5
+  m_Radius: 1
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &867247230806346655
 GameObject:
@@ -95,7 +96,7 @@ Transform:
   m_GameObject: {fileID: 867247230806346655}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 183.43382, y: 134.09, z: -457.77634}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
