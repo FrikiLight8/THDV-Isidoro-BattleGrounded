@@ -12,17 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a8647d50bcd8569409497b2d0729b8f3, type: 3}
   m_Name: PlayerData
   m_EditorClassIdentifier: 
-  speed: 6
-  turnSmoothTime: 0.1
-  jumpHeight: 5
-  gravity: -9.81
-  rollSpeed: 8
-  rollHeight: 0.5
-  rollDuration: 0.6
-  rollCooldown: 1
-  lastRollTime: 72.81983
-  wallRunSpeed: 8
-  wallRunDuration: 2
-  wallRunGravity: -2
-  wallDetectionDistance: 1.5
-  wallJumpForce: 8
+  sensitivity: 50
+  moveSpeed: 400
+  walkSpeed: 10
+  runSpeed: 20

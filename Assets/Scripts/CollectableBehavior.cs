@@ -6,14 +6,16 @@ public class CollectableBehavior : MonoBehaviour
 {
     [SerializeField]
     private MeshRenderer model;
+    [SerializeField]
+    private CollectableDataSO collectableDataSO;
 
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log("Entro en contacto");
         if (other.gameObject.layer == 7 && model.enabled)
         {
             CollectableLogic();
-            Debug.Log("Entro en contacto layer");
+            other.TryGetComponent(out PlayerMovement player);
+            player.IncreaseSpeed(collectableDataSO.increasedSpeed, collectableDataSO.time);
         }
     }
 

@@ -39,6 +39,8 @@ public class PlayerMovement : MonoBehaviour
 	private float x;
 	private float y;
 	private float vel;
+	private float speedTimer;
+	private float originalSpeed;
 
     //Private bools
 	private bool readyToJump;
@@ -85,6 +87,7 @@ public class PlayerMovement : MonoBehaviour
 		Cursor.visible = false;
 		readyToJump = true;
 		wallNormalVector = Vector3.up;
+		originalSpeed = playerDataSO.walkSpeed;
 	}
 
 	private void LateUpdate()
@@ -105,6 +108,15 @@ public class PlayerMovement : MonoBehaviour
 		MyInput();
         //Looking around
 		Look();
+		
+		if (speedTimer > 0 )
+		{
+            speedTimer -= Time.deltaTime;
+        }
+		else 
+		{
+			playerDataSO.walkSpeed = originalSpeed;
+        }
 	}
 
 	public int PlayerSpeed()
@@ -221,6 +233,12 @@ public class PlayerMovement : MonoBehaviour
 		}
 		rb.AddForce(orientation.transform.forward * y * playerDataSO.moveSpeed * Time.deltaTime * num4 * num5);
 		rb.AddForce(orientation.transform.right * x * playerDataSO.moveSpeed * Time.deltaTime * num4);
+	}
+
+	public void	IncreaseSpeed(float speed, float seconds)
+	{
+		speedTimer = seconds;
+		playerDataSO.walkSpeed += speed;
 	}
 
     //Ready to jump again
