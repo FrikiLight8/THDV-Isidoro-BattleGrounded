@@ -54,6 +54,7 @@ public class PlayerMovement : MonoBehaviour
 	private bool cancellingGrounded;
 	private bool cancellingWall;
 	private bool cancellingSurf;
+	private bool cancellMouseMovement;
 
     //Private Vector3's
 	private Vector3 grapplePoint;
@@ -255,6 +256,8 @@ public class PlayerMovement : MonoBehaviour
     //Looking around by using your mouse
 	private void Look()
 	{
+		if (!cancellMouseMovement)
+		{
 		float num = Input.GetAxis("Mouse X") * playerDataSO.sensitivity * Time.fixedDeltaTime * sensMultiplier;
 		float num2 = Input.GetAxis("Mouse Y") * playerDataSO.sensitivity * Time.fixedDeltaTime * sensMultiplier;
 		desiredX = playerCam.transform.localRotation.eulerAngles.y + num;
@@ -264,6 +267,12 @@ public class PlayerMovement : MonoBehaviour
 		actualWallRotation = Mathf.SmoothDamp(actualWallRotation, wallRunRotation, ref wallRotationVel, 0.2f);
 		playerCam.transform.localRotation = Quaternion.Euler(xRotation, desiredX, actualWallRotation);
 		orientation.transform.localRotation = Quaternion.Euler(0f, desiredX, 0f);
+        }
+    }
+
+	public void EnableMouse(bool setActive)
+	{
+        cancellMouseMovement = setActive;
 	}
 
     //Make the player movement feel good 

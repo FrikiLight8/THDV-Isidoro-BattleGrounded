@@ -6,6 +6,8 @@ public class UIManager : MonoBehaviour
 {
     [SerializeField]
     private GameObject pauseUI;
+    [SerializeField]
+    private PlayerMovement player;
     [HideInInspector]
     public bool isPaused;
     public void ActivatePause()
@@ -13,6 +15,7 @@ public class UIManager : MonoBehaviour
         pauseUI.SetActive(true);
         Time.timeScale = 0f;
         Cursor.lockState = CursorLockMode.None;
+        player.EnableMouse(true);
         isPaused = true;
     }
 
@@ -21,6 +24,7 @@ public class UIManager : MonoBehaviour
         pauseUI.SetActive(false);
         Time.timeScale = 1f;
         Cursor.lockState = CursorLockMode.Locked;
+        player.EnableMouse(false);
         isPaused = false;
     }
 }
