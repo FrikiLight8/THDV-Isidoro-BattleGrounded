@@ -105,6 +105,13 @@ public class PlayerMovement : MonoBehaviour
 		MyInput();
         //Looking around
 		Look();
+		Debug.Log("velocidad: " + rb.velocity.sqrMagnitude); 
+	}
+
+	public int PlayerSpeed()
+	{
+		float mag = MathF.Abs(rb.velocity.sqrMagnitude);
+		return (int)mag;
 	}
 
     //Player input

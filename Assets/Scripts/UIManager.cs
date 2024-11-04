@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class UIManager : MonoBehaviour
 {
@@ -8,8 +9,16 @@ public class UIManager : MonoBehaviour
     private GameObject pauseUI;
     [SerializeField]
     private PlayerMovement player;
+    [SerializeField]
+    private TextMeshProUGUI velocidad;
     [HideInInspector]
     public bool isPaused;
+
+    private void Update()
+    {
+        UpdateHUD();
+    }
+
     public void ActivatePause()
     {
         pauseUI.SetActive(true);
@@ -26,5 +35,11 @@ public class UIManager : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         player.EnableMouse(false);
         isPaused = false;
+    }
+
+    public void UpdateHUD()
+    {
+        int mag = player.PlayerSpeed();
+        velocidad.text = "Velocidad: " + mag;
     }
 }
