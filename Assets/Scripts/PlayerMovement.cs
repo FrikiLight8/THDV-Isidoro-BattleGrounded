@@ -11,6 +11,9 @@ public class PlayerMovement : MonoBehaviour
 	private Collider playerCollider;
 	public Rigidbody rb;
 
+    [SerializeField]
+    private PlayerDataSO playerDataSO;
+
     [Space(10)]
 
 	public LayerMask whatIsGround;
@@ -18,10 +21,6 @@ public class PlayerMovement : MonoBehaviour
 
     [Header("MovementSettings")]
     //Movement Settings 
-	public float sensitivity = 50f;
-	public float moveSpeed = 4500f;
-	public float walkSpeed = 20f;
-	public float runSpeed = 10f;
 	public bool grounded;
 	public bool onWall;
 
@@ -65,9 +64,12 @@ public class PlayerMovement : MonoBehaviour
 
     //Private int
 	private int nw;
-    
+
+    // UI
+    public UIManager uiManager;
+
     //Instance
-	public static PlayerMovement Instance { get; private set; }
+    public static PlayerMovement Instance { get; private set; }
 
 	private void Awake()
 	{
@@ -119,7 +121,18 @@ public class PlayerMovement : MonoBehaviour
 		{
 			StopCrouch();
 		}
-	}
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (uiManager.isPaused)
+            {
+                uiManager.DesactivatePause();
+            }
+            else
+            {
+                uiManager.ActivatePause();
+            }
+        }
+    }
 
     //Scale player down
 	private void StartCrouch()
@@ -152,10 +165,10 @@ public class PlayerMovement : MonoBehaviour
 		{
 			Jump();
 		}
-		float num3 = walkSpeed;
+		float num3 = playerDataSO.walkSpeed;
 		if (sprinting)
 		{
-			num3 = runSpeed;
+			num3 = playerDataSO.runSpeed;
 		}
 		if (crouching && grounded && readyToJump)
 		{
@@ -199,8 +212,8 @@ public class PlayerMovement : MonoBehaviour
 			num4 = 0.7f;
 			num5 = 0.3f;
 		}
-		rb.AddForce(orientation.transform.forward * y * moveSpeed * Time.deltaTime * num4 * num5);
-		rb.AddForce(orientation.transform.right * x * moveSpeed * Time.deltaTime * num4);
+		rb.AddForce(orientation.transform.forward * y * playerDataSO.moveSpeed * Time.deltaTime * num4 * num5);
+		rb.AddForce(orientation.transform.right * x * playerDataSO.moveSpeed * Time.deltaTime * num4);
 	}
 
     //Ready to jump again
@@ -242,8 +255,8 @@ public class PlayerMovement : MonoBehaviour
     //Looking around by using your mouse
 	private void Look()
 	{
-		float num = Input.GetAxis("Mouse X") * sensitivity * Time.fixedDeltaTime * sensMultiplier;
-		float num2 = Input.GetAxis("Mouse Y") * sensitivity * Time.fixedDeltaTime * sensMultiplier;
+		float num = Input.GetAxis("Mouse X") * playerDataSO.sensitivity * Time.fixedDeltaTime * sensMultiplier;
+		float num2 = Input.GetAxis("Mouse Y") * playerDataSO.sensitivity * Time.fixedDeltaTime * sensMultiplier;
 		desiredX = playerCam.transform.localRotation.eulerAngles.y + num;
 		xRotation -= num2;
 		xRotation = Mathf.Clamp(xRotation, -90f, 90f);
@@ -264,21 +277,21 @@ public class PlayerMovement : MonoBehaviour
 		float num2 = 0.01f;
 		if (crouching)
 		{
-			rb.AddForce(moveSpeed * Time.deltaTime * -rb.velocity.normalized * slideSlowdown);
+			rb.AddForce(playerDataSO.moveSpeed * Time.deltaTime * -rb.velocity.normalized * slideSlowdown);
 			return;
 		}
 		if ((Math.Abs(mag.x) > num2 && Math.Abs(x) < 0.05f) || (mag.x < 0f - num2 && x > 0f) || (mag.x > num2 && x < 0f))
 		{
-			rb.AddForce(moveSpeed * orientation.transform.right * Time.deltaTime * (0f - mag.x) * num);
+			rb.AddForce(playerDataSO.moveSpeed * orientation.transform.right * Time.deltaTime * (0f - mag.x) * num);
 		}
 		if ((Math.Abs(mag.y) > num2 && Math.Abs(y) < 0.05f) || (mag.y < 0f - num2 && y > 0f) || (mag.y > num2 && y < 0f))
 		{
-			rb.AddForce(moveSpeed * orientation.transform.forward * Time.deltaTime * (0f - mag.y) * num);
+			rb.AddForce(playerDataSO.moveSpeed * orientation.transform.forward * Time.deltaTime * (0f - mag.y) * num);
 		}
-		if (Mathf.Sqrt(Mathf.Pow(rb.velocity.x, 2f) + Mathf.Pow(rb.velocity.z, 2f)) > walkSpeed)
+		if (Mathf.Sqrt(Mathf.Pow(rb.velocity.x, 2f) + Mathf.Pow(rb.velocity.z, 2f)) > playerDataSO.walkSpeed)
 		{
 			float num3 = rb.velocity.y;
-			Vector3 vector = rb.velocity.normalized * walkSpeed;
+			Vector3 vector = rb.velocity.normalized * playerDataSO.walkSpeed;
 			rb.velocity = new Vector3(vector.x, num3, vector.z);
 		}
 	}
@@ -360,7 +373,7 @@ public class PlayerMovement : MonoBehaviour
 	{
 		if (wallRunning)
 		{
-			rb.AddForce(-wallNormalVector * Time.deltaTime * moveSpeed);
+			rb.AddForce(-wallNormalVector * Time.deltaTime * playerDataSO.moveSpeed);
 			rb.AddForce(Vector3.up * Time.deltaTime * rb.mass * 100f * wallRunGravity);
 		}
 	}

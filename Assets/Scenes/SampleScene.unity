@@ -14652,18 +14652,16 @@ MonoBehaviour:
   playerCam: {fileID: 1745562140}
   orientation: {fileID: 993867322}
   rb: {fileID: 7293809973600146110}
+  playerDataSO: {fileID: 11400000, guid: d44fd1ecc9c315b479ad2c28a7c24345, type: 2}
   whatIsGround:
     serializedVersion: 2
     m_Bits: 8
   whatIsWallrunnable:
     serializedVersion: 2
     m_Bits: 8
-  sensitivity: 50
-  moveSpeed: 4500
-  walkSpeed: 20
-  runSpeed: 10
   grounded: 0
   onWall: 0
+  uiManager: {fileID: 419131993}
 --- !u!54 &7293809973600146110
 Rigidbody:
   m_ObjectHideFlags: 0
