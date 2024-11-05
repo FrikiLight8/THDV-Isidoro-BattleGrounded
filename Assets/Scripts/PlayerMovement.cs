@@ -25,7 +25,7 @@ public class PlayerMovement : MonoBehaviour
 	public bool onWall;
 
     //Private Floats
-    private float wallRunGravity = 1f;
+    private float wallRunGravity = 5f;
 	private float maxSlopeAngle = 35f;
 	private float wallRunRotation;
     private float slideSlowdown = 0.2f;
@@ -131,12 +131,12 @@ public class PlayerMovement : MonoBehaviour
 		x = Input.GetAxisRaw("Horizontal");
 		y = Input.GetAxisRaw("Vertical");
 		jumping = Input.GetButton("Jump");
-		crouching = Input.GetKey(KeyCode.LeftShift);
-		if (Input.GetKeyDown(KeyCode.LeftShift))
+		crouching = Input.GetKey(KeyCode.LeftControl);
+		if (Input.GetKeyDown(KeyCode.LeftControl))
 		{
 			StartCrouch();
 		}
-		if (Input.GetKeyUp(KeyCode.LeftShift))
+		if (Input.GetKeyUp(KeyCode.LeftControl))
 		{
 			StopCrouch();
 		}
