@@ -8,6 +8,7 @@ public class CollectableBehavior : MonoBehaviour
     private MeshRenderer model;
     [SerializeField]
     private CollectableDataSO collectableDataSO;
+    
 
     private void OnTriggerEnter(Collider other)
     {
@@ -22,6 +23,13 @@ public class CollectableBehavior : MonoBehaviour
     private void CollectableLogic()
     {
         model.enabled = false;
-        Destroy(this, 3f);
+        // Desactiva el objeto y lo reactivará después de 'respawnTime' segundos
+        StartCoroutine(Respawn());
+    }
+
+    private IEnumerator Respawn()
+    {
+        yield return new WaitForSeconds(collectableDataSO.respawnTime);
+        model.enabled = true; // Reactiva la visualización del objeto
     }
 }

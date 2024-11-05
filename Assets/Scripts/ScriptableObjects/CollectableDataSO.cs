@@ -11,4 +11,6 @@ public class CollectableDataSO : ScriptableObject
     public float increasedSpeed = 300f;
     [SerializeField]
     public float time = 3f;
+    [SerializeField]
+    public float respawnTime = 5f; 
 }
