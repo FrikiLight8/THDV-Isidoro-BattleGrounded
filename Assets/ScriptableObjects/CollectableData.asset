@@ -12,5 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8af4b5a6f9fab034396e31981e5f0929, type: 3}
   m_Name: CollectableData
   m_EditorClassIdentifier: 
-  increasedSpeed: 300
+  increasedSpeed: 250
   time: 3
+  respawnTime: 5
