@@ -42,4 +42,10 @@ public class UIManager : MonoBehaviour
         int mag = player.PlayerSpeed();
         velocidad.text = "Velocidad: " + mag;
     }
+
+    public void QuitGame()
+    {
+        Application.Quit();
+        Debug.Log("tu vieja pta");
+    }
 }
