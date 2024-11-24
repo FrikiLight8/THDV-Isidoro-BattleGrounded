@@ -34,9 +34,10 @@ public class PlayerMovement : MonoBehaviour
 	private float desiredX;
 	private float xRotation;
 	private float sensMultiplier = 1f;
-	private float jumpCooldown = 0.25f;
+	private float jumpCooldown = 0.1f;
 	private float jumpForce = 550f;
-	private float x;
+    private float MAXjumpForce;
+    private float x;
 	private float y;
 	private float vel;
 	private float speedTimer;
@@ -88,6 +89,7 @@ public class PlayerMovement : MonoBehaviour
 		readyToJump = true;
 		wallNormalVector = Vector3.up;
 		originalSpeed = playerDataSO.walkSpeed;
+		MAXjumpForce = jumpForce;
 	}
 
 	private void LateUpdate()
@@ -245,6 +247,7 @@ public class PlayerMovement : MonoBehaviour
 	private void ResetJump()
 	{
 		readyToJump = true;
+		jumpForce = MAXjumpForce;
 	}
 
     //Player go fly
@@ -267,7 +270,8 @@ public class PlayerMovement : MonoBehaviour
 		    }
 		    if (wallRunning)
 		    {
-			    rb.AddForce(wallNormalVector * jumpForce * 3f);
+				jumpForce -= 25;
+			    rb.AddForce(wallNormalVector * jumpForce * 2f);
 		    }
 		    Invoke("ResetJump", jumpCooldown);
 		    if (wallRunning)
