@@ -6,6 +6,7 @@ public class ImpulseOnKeyPress : MonoBehaviour
 {
     public float impulseForce = 10f; // Fuerza del impulso
     public KeyCode activationKey = KeyCode.E; // Tecla para activar el impulso
+    public Camera playerCamera; // Referencia a la cámara del jugador
 
     private bool isPlayerInRange = false; // Verifica si el jugador está en rango
     private Rigidbody playerRigidbody; // Referencia al Rigidbody del jugador
@@ -44,11 +45,14 @@ public class ImpulseOnKeyPress : MonoBehaviour
 
     private void ApplyImpulse()
     {
-        if (playerRigidbody != null)
+        if (playerRigidbody != null && playerCamera != null)
         {
-            // Aplica la fuerza hacia adelante basada en la dirección del jugador
-            Vector3 forwardDirection = playerRigidbody.transform.forward;
-            playerRigidbody.AddForce(forwardDirection * impulseForce, ForceMode.Impulse);
+            // Usa la dirección de la cámara para calcular el impulso
+            Vector3 cameraForward = playerCamera.transform.forward;
+            cameraForward.y = 0; // Ignora la componente vertical para que sea solo en el plano horizontal
+            cameraForward.Normalize();
+
+            playerRigidbody.AddForce(cameraForward * impulseForce, ForceMode.Impulse);
         }
     }
 }
