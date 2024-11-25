@@ -24,6 +24,7 @@ public class UIManager : MonoBehaviour
         pauseUI.SetActive(true);
         Time.timeScale = 0f;
         Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
         player.EnableMouse(true);
         isPaused = true;
     }
@@ -33,6 +34,7 @@ public class UIManager : MonoBehaviour
         pauseUI.SetActive(false);
         Time.timeScale = 1f;
         Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
         player.EnableMouse(false);
         isPaused = false;
     }
